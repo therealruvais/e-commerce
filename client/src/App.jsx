@@ -1,6 +1,6 @@
 import React from 'react'
 import { Routes,Route } from 'react-router-dom'
-import { LoginPage,SignupPage } from "./routes";
+import { LoginPage, SignupPage, ActivationPage } from "./routes";
 
 const App = () => {
   return (
@@ -12,6 +12,10 @@ const App = () => {
       <Route
         path="/signup"
         element={<SignupPage />}
+      />
+      <Route
+        path="/activation/:activation_token"
+        element={<ActivationPage />}
       />
     </Routes>
   );

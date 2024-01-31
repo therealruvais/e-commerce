@@ -7,6 +7,8 @@ const path = require("path");
 const fs = require("fs");
 const jwt = require("jsonwebtoken");
 const sendMail = require("../utils/sendMail");
+const catchAsyncError = require('../middleware/catchAssyncErrors');
+const sendToken = require("../utils/jwtToken");
 
 router.post("/create-user", upload.single("file"), async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -23,9 +25,7 @@ router.post("/create-user", upload.single("file"), async (req, res, next) => {
       if (err) {
         console.log(err);
         res.status(500).json({ message: "error deleting" });
-      } else {
-        res.json({ message: "file deleted successfully" });
-      }
+      } 
     });
     return next(new ErrorHandler("user already exists", 400));
   }
@@ -38,9 +38,7 @@ router.post("/create-user", upload.single("file"), async (req, res, next) => {
     password: password,
     avatar: fileUrl,
   };
-  // const newUser = await User.create(user);
-  // res.json({ success: true, newUser });
-  // console.log(user);
+
   const activationToken = createActionToken(user);
   const activationUrl = `http://localhost:5173/activation/${activationToken}`;
 
@@ -64,5 +62,27 @@ router.post("/create-user", upload.single("file"), async (req, res, next) => {
 const createActionToken = (user) => {
   return jwt.sign(user, process.env.ACTIVATION_SECRET, { expiresIn: "5m" });
 };
+
+// activate user message
+router.post(
+  "/activation",
+  catchAsyncError(async (req, res, next) => {
+    try {
+      const { activation_token } = req.body;
+      const newUser = jwt.verify(
+        activation_token,
+        process.env.ACTIVATION_SECRET
+      );
+      if (!newUser) {
+        return next(new ErrorHandler("invalid Token", 400));
+      }
+      const { name, email, password, avatar } = newUser;
+      await User.create({ name, email, password, avatar });
+      sendToken(newUser, 201, res);
+    } catch (error) {
+      return next(new ErrorHandler(err.message, 500))
+    }
+  })
+);
 
 module.exports = router;
