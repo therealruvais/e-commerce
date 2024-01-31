@@ -3,6 +3,8 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import styles from "../../styles/Styles";
 import { Link } from "react-router-dom";
 import { RxAvatar } from "react-icons/rx";
+import axios from "axios";
+import { server } from "../../server";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
@@ -11,10 +13,26 @@ const SignUp = () => {
   const [visible, setVisible] = useState(false);
   const [avatar, setAvatar] = useState(null);
 
-  const handleSubmit = () => {};
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const config = {
+      headers: { "Content-Type": "multipart/form-data" },
+    };
+    const newForm = new FormData();
+    newForm.append("file", avatar);
+    newForm.append("name", name);
+    newForm.append("email", email);
+    newForm.append("password", password);
+
+    axios
+      .post(`${server}/create-user`, newForm, config)
+      .then((res) => console.log(res))
+      .catch((err) => console.log(err));
+  };
+
   const handleFileinput = (e) => {
     const file = e.target.files[0];
-    setAvatar(file)
+    setAvatar(file);
   };
 
   return (
@@ -39,7 +57,7 @@ const SignUp = () => {
                   className="h-full w-full object-cover rounded-full"
                 />
               ) : (
-                <RxAvatar className="h-10 w-10" />
+                <RxAvatar className="h-full w-full" />
               )}
             </span>
           </div>
@@ -59,7 +77,10 @@ const SignUp = () => {
           </label>
         </div>
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:pxpx-10">
-          <form className="space-y-6">
+          <form
+            className="space-y-6"
+            onSubmit={handleSubmit}
+          >
             <div>
               <label
                 className="block ml-2 text-sm font-medium text-gray-700 "
@@ -121,7 +142,7 @@ const SignUp = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
-                {visible  ? (
+                {visible ? (
                   <FaEye
                     className="cursor-pointer"
                     onClick={() => setVisible(false)}

@@ -20,7 +20,7 @@ const Login = () => {
       </div>
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md border rounded-md border-gray-400 ">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:pxpx-10">
-          <form className="space-y-6">
+          <form className="space-y-6" >
             <div>
               <label
                 className="block ml-2 text-sm font-medium text-gray-700 "
